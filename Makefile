@@ -7,6 +7,9 @@ build:
 package-install:
 	python3 -m pip install --user dist/*.whl
 
+uninstall:
+	python3 -m pip uninstall --yes dist/*.whl
+
 reinstall:
 	pip install --user --force-reinstall dist/*.whl
 
