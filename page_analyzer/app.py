@@ -5,5 +5,5 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def login():
+def start():
     return render_template('index.html')
