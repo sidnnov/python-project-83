@@ -5,3 +5,5 @@ dist/
 .venv/
 .coverage
 coverage.xml
+.env
+test.py
