@@ -88,17 +88,38 @@ def get_urls():
 def get_url(id):
     messages = get_flashed_messages(with_categories=True)
     with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as curs:
+            curs.execute("SELECT * FROM urls WHERE id = %s", (id,))
+            urls_data = curs.fetchone()
+            curs.execute("SELECT * FROM url_checks WHERE url_id = %s", (urls_data.id,))
+            checks_data = curs.fetchall()
+    if not urls_data:
+        return render_template('404.html')
+    return render_template(
+        "url.html",
+        urls_id=urls_data.id,
+        name=urls_data.name,
+        urls_date=urls_data.created_at,
+        checks_data=checks_data,
+        messages=messages,
+    )
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
+
+@app.route("/urls/<id>/checks", methods=["POST", "GET"])
+def check_url(id):
+    with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
         ) as curs:
-            curs.execute("SELECT * FROM urls WHERE id = %s", (id,))
-            data = curs.fetchone()
-    if not data:
-        return "Page not found", 404
-    return render_template(
-        "url.html",
-        id=data.id,
-        name=data.name,
-        date=data.created_at,
-        messages=messages,
-    )
+            curs.execute(
+                "INSERT INTO url_checks (url_id, created_at) VALUES (%s, %s)",
+                # (correct_url, datetime.now().date())
+                (id, datetime.today().isoformat(),),
+            )
+    flash("Страница успешно проверена", "success")
+    return redirect(url_for('get_url', id=id))
