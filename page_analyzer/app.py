@@ -43,11 +43,25 @@ def index():
     return render_template("/index.html")
 
 
+# DICT = {'more_255': ('danger', 'URL превышает 255 символов'), 'incorrect': ('danger', 'Некорректный URL')}
+
+
 @app.route("/urls", methods=["POST"])
 def add_url():
     url_with_form = request.form["url"]
     if not url(url_with_form):
+        if len(url_with_form) > 255:
+            flash("URL превышает 255 символов", "danger")
         flash("Некорректный URL", "danger")
+        messages = get_flashed_messages(with_categories=True)
+        print(messages)
+        return render_template(
+            "/index.html",
+            url=url_with_form,
+            messages=messages,
+        ), 422
+    if len(url_with_form) > 255:
+        flash("URL превышает 255 символов", "danger")
         messages = get_flashed_messages(with_categories=True)
         return render_template(
             "/index.html",
@@ -79,7 +93,10 @@ def get_urls():
         with conn.cursor(
             cursor_factory=psycopg2.extras.NamedTupleCursor
         ) as curs:
-            curs.execute("SELECT * FROM urls ORDER BY id DESC")
+            curs.execute('''
+            SELECT urls.id, urls.name, url_checks.created_at
+            FROM urls LEFT JOIN url_checks ON urls.id = url_checks.url_id
+            ORDER BY id DESC''')
             data = curs.fetchall()
     return render_template("urls.html", data=data)
 
@@ -91,7 +108,9 @@ def get_url(id):
         with conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as curs:
             curs.execute("SELECT * FROM urls WHERE id = %s", (id,))
             urls_data = curs.fetchone()
-            curs.execute("SELECT * FROM url_checks WHERE url_id = %s", (urls_data.id,))
+            curs.execute('''SELECT * FROM url_checks
+                         WHERE url_id = %s ORDER BY id DESC''',
+                         (urls_data.id,))
             checks_data = curs.fetchall()
     if not urls_data:
         return render_template('404.html')

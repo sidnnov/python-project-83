@@ -14,16 +14,20 @@
             </tr>
           </thead>
         <tbody>
-            {% for info in data %}
+            {% for inf in data %}
             <tr>
-              <th scope="row">{{ info.id }}</th>
+              <th scope="row">{{ inf.id }}</th>
               <td>
-                <a href="{{ url_for('get_url', id=info.id) }}">
-                {{ info.name }}
+                <a href="{{ url_for('get_url', id=inf.id) }}">
+                {{ inf.name }}
                 </a>
               </td>
-              <td>-</td>
-              <td>-</td>
+              {% if inf.created_at %}
+                <td>{{ inf.created_at }}</td>
+              {% else %}
+                <td></td>
+              {% endif %}
+              <td></td>
             </tr>
             {% endfor %}
         </tbody>
