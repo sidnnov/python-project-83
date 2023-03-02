@@ -149,13 +149,14 @@ def check_url(id):
             curs.execute('''
             SELECT name from urls WHERE id = %s''', (id,))
             data = curs.fetchone()
-            try:
-                response = requests.get(data.name)
-                print(type(response))
-                h1, title, description = get_content(response)
-            except requests.exceptions.ConnectionError:
-                flash("Произошла ошибка при проверке", "danger")
-                return redirect(url_for('get_url', id=id))
+    try:
+        response = requests.get(data.name)
+        h1, title, description = get_content(response)
+    except requests.exceptions.ConnectionError:
+        flash("Произошла ошибка при проверке", "danger")
+        return redirect(url_for('get_url', id=id))
+    with psycopg2.connect(DATABASE_URL) as conn:
+        with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute('''
             INSERT INTO url_checks
             (url_id, created_at, status_code, h1, title, description)
