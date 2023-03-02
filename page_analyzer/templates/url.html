@@ -46,10 +46,10 @@
               {% for data in checks_data %}
               <tr>
                 <td>{{ data.id }}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>{{ data.status_code }}</td>
+                <td>{{ data.h1 }}</td>
+                <td>{{ data.title }}</td>
+                <td>{{ data.description }}</td>
                 <td>{{ data.created_at }}</td>
               </tr>
               {% endfor %}

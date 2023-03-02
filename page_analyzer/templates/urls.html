@@ -24,10 +24,11 @@
               </td>
               {% if inf.created_at %}
                 <td>{{ inf.created_at }}</td>
+                <td>{{ inf.status_code }}</td>
               {% else %}
                 <td></td>
+                <td></td>
               {% endif %}
-              <td></td>
             </tr>
             {% endfor %}
         </tbody>
