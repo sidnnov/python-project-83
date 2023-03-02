@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from datetime import datetime
 from bs4 import BeautifulSoup
 from psycopg2.extras import NamedTupleCursor
+from requests import ConnectionError, HTTPError
 import psycopg2
 import requests
 import os
@@ -151,10 +152,11 @@ def check_url(id):
             data = curs.fetchone()
     try:
         response = requests.get(data.name)
-        h1, title, description = get_content(response)
-    except requests.exceptions.ConnectionError:
+        response.raise_for_status()
+    except (ConnectionError, HTTPError):
         flash("Произошла ошибка при проверке", "danger")
         return redirect(url_for('get_url', id=id))
+    h1, title, description = get_content(response)
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute('''
