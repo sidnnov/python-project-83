@@ -1,6 +1,7 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/sidnnov/python-project-83/workflows/hexlet-check/badge.svg)](https://github.com/sidnnov/python-project-83/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/54f8ce582e7588530d81/maintainability)](https://codeclimate.com/github/sidnnov/python-project-83/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/54f8ce582e7588530d81/test_coverage)](https://codeclimate.com/github/sidnnov/python-project-83/test_coverage)
 
 ## Page analyzer!
 Checking sites for SEO suitability.
