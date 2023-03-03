@@ -22,6 +22,7 @@ jobs:
           make install
       - name: Run linter and pytest
         run: |
+          sudo service postgresql start
           make schema-load
           make check
       - name: Test & publish code coverage
