@@ -41,14 +41,14 @@ def is_duplicate_url(name: str) -> int:
     return data.id if data else None
 
 
-def get_content(data):
-    content = BeautifulSoup(data.text, 'lxml')
-    h1 = content.find('h1')
-    title = content.find('title')
-    meta_data = content.find('meta', attrs={'name': 'description'})
-    h1 = h1.text if h1 else ''
-    title = title.text if title else ''
-    description = meta_data.get('content') if meta_data else ''
+def get_content(data: str) -> tuple:
+    content = BeautifulSoup(data, "lxml")
+    h1 = content.find("h1")
+    title = content.find("title")
+    meta_data = content.find("meta", attrs={"name": "description"})
+    h1 = h1.text if h1 else ""
+    title = title.text if title else ""
+    description = meta_data.get("content") if meta_data else ""
     return h1, title, description
 
 
@@ -66,7 +66,7 @@ def save_new_url_to_bd_urls(url: str) -> int:
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('404.html'), 404
+    return render_template("404.html"), 404
 
 
 @app.route("/")
@@ -125,10 +125,10 @@ def get_url(id):
                 curs.execute('''
                 SELECT * FROM urls WHERE id = %s''', (id,))
             except psycopg2.errors.InvalidTextRepresentation:
-                return render_template('404.html')
+                return render_template("404.html")
             urls_data = curs.fetchone()
             if not urls_data:
-                return render_template('404.html')
+                return render_template("404.html")
             curs.execute('''
             SELECT * FROM url_checks
             WHERE url_id = %s ORDER BY id DESC''', (urls_data.id,))
@@ -156,7 +156,7 @@ def check_url(id):
     except (ConnectionError, HTTPError):
         flash("Произошла ошибка при проверке", "danger")
         return redirect(url_for('get_url', id=id))
-    h1, title, description = get_content(response)
+    h1, title, description = get_content(response.text)
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
             curs.execute('''
@@ -167,4 +167,4 @@ def check_url(id):
                 response.status_code, h1, title, description),
             )
     flash("Страница успешно проверена", "success")
-    return redirect(url_for('get_url', id=id))
+    return redirect(url_for("get_url", id=id))
