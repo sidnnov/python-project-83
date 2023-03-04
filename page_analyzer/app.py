@@ -81,6 +81,7 @@ def add_url():
         if len(url_with_form) > 255:
             flash("URL превышает 255 символов", "danger")
         flash("Некорректный URL", "danger")
+        flash("URL обязателен", "danger")
         messages = get_flashed_messages(with_categories=True)
         return render_template(
             "/index.html",
