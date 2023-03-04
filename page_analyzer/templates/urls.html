@@ -4,35 +4,37 @@
     <main class="flex-grow-1">
     <div class="container-lg mt-3">
     <h1>Сайты</h1>
-    <table class="table table-bordered table-hover text-nowrap" data-test="urls">
-        <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Имя</th>
-              <th scope="col">Последняя проверка</th>
-              <th scope="col">Код ответа</th>
-            </tr>
-          </thead>
-        <tbody>
-            {% for inf in data %}
-            <tr>
-              <th scope="row">{{ inf.id }}</th>
-              <td>
-                <a href="{{ url_for('get_url', id=inf.id) }}">
-                {{ inf.name }}
-                </a>
-              </td>
-              {% if inf.created_at %}
-                <td>{{ inf.created_at }}</td>
-                <td>{{ inf.status_code }}</td>
-              {% else %}
-                <td></td>
-                <td></td>
-              {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover text-nowrap" data-test="urls">
+            <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Имя</th>
+                  <th scope="col">Последняя проверка</th>
+                  <th scope="col">Код ответа</th>
+                </tr>
+              </thead>
+            <tbody>
+                {% for inf in data %}
+                <tr>
+                  <th scope="row">{{ inf.id }}</th>
+                  <td>
+                    <a href="{{ url_for('get_url', id=inf.id) }}">
+                    {{ inf.name }}
+                    </a>
+                  </td>
+                  {% if inf.created_at %}
+                    <td>{{ inf.created_at }}</td>
+                    <td>{{ inf.status_code }}</td>
+                  {% else %}
+                    <td></td>
+                    <td></td>
+                  {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
     </div>
     </main>
 {% endblock main %}
