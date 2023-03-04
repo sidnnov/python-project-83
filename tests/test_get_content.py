@@ -1,27 +1,45 @@
 from page_analyzer.app import get_content
 import pytest
 
+META1 = """
+<html>
+    <head>
+        <h1>h1</h1>
+        <title>title</title>
+        <meta name="description" content="description">
+    </head>
+</html>"""
+META2 = """
+<html>
+    <head>
+        <title>title</title>
+        <meta name="description" content="description">
+    </head>
+</html>"""
+META3 = """
+<html>
+    <head>
+        <h1>h1</h1>
+        <meta name="description" content="description">
+    </head>
+</html>"""
+META4 = """
+<html>
+    <head>
+        <h1>h1</h1>
+        <title>title</title>
+    </head>
+</html>"""
 
-@pytest.mark.parametrize("url, result", [
-    (
-        'tests/fixtures/test_meta1.html',
-        ('h1', 'title', 'description'),
-    ),
-    (
-        'tests/fixtures/test_meta2.html',
-        ('', 'title', 'description'),
-    ),
-    (
-        'tests/fixtures/test_meta3.html',
-        ('h1', '', 'description'),
-    ),
-    (
-        'tests/fixtures/test_meta4.html',
-        ('h1', 'title', ''),
-    )
-    ]
+
+@pytest.mark.parametrize(
+    "url, result",
+    [
+        (META1, ("h1", "title", "description")),
+        (META2, ("", "title", "description")),
+        (META3, ("h1", "", "description")),
+        (META4, ("h1", "title", "")),
+    ],
 )
 def test_get_content(url, result):
-    with open(url) as file:
-        data = file.read()
-    assert get_content(data) == result
+    assert get_content(url) == result
