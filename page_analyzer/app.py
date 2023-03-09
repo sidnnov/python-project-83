@@ -23,6 +23,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 DATABASE_URL = os.getenv("DATABASE_URL")
+LENGTH = 255
 
 
 def normalize_url(url: str) -> str:
@@ -30,15 +31,6 @@ def normalize_url(url: str) -> str:
     correct_url = url_parse._replace(
         path="", params="", query="", fragment="").geturl()
     return correct_url
-
-
-def is_duplicate_url(name: str) -> int:
-    with psycopg2.connect(DATABASE_URL) as conn:
-        with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
-            curs.execute('''
-            SELECT id FROM urls WHERE name = %s''', (name,))
-            data = curs.fetchone()
-    return data.id if data else None
 
 
 def get_content(data: str) -> tuple:
@@ -52,16 +44,31 @@ def get_content(data: str) -> tuple:
     return h1, title, description
 
 
-def save_new_url_to_bd_urls(url: str) -> int:
+def save_new_url_to_bd_urls(url):
     with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=NamedTupleCursor) as curs:
+            curs.execute('''
+            SELECT id FROM urls WHERE name = %s''', (url,))
+            data = curs.fetchone()
+            if data:
+                return data.id, False
             curs.execute('''
             INSERT INTO urls (name, created_at)
             VALUES (%s, %s) RETURNING id''', (
                 url, datetime.now().isoformat(timespec="seconds")),
             )
             data = curs.fetchone()
-    return data.id
+    return data.id, True
+
+
+def check_error(url_with_form: str) -> list:
+    if not url(url_with_form):
+        flash("Некорректный URL", "danger")
+        if not url_with_form:
+            flash("URL обязателен", "danger")
+    if len(url_with_form) > LENGTH:
+        flash(f"URL превышает {LENGTH} символов", "danger")
+    return get_flashed_messages(with_categories=True)
 
 
 @app.errorhandler(404)
@@ -76,32 +83,20 @@ def index():
 
 @app.route("/urls", methods=["POST"])
 def add_url():
-    url_with_form = request.form["url"]
-    if not url(url_with_form):
-        if len(url_with_form) > 255:
-            flash("URL превышает 255 символов", "danger")
-        flash("Некорректный URL", "danger")
-        flash("URL обязателен", "danger")
-        messages = get_flashed_messages(with_categories=True)
+    url_with_form = request.form["url"].lower()
+    error = check_error(url_with_form)
+    if error:
         return render_template(
             "/index.html",
             url=url_with_form,
-            messages=messages), 422
-    if len(url_with_form) > 255:
-        flash("URL превышает 255 символов", "danger")
-        messages = get_flashed_messages(with_categories=True)
-        return render_template(
-            "/index.html",
-            url=url_with_form,
-            messages=messages), 422
+            messages=error), 422
     correct_url = normalize_url(url_with_form)
-    id = is_duplicate_url(correct_url)
-    if id:
-        flash("Страница уже существует", "info")
+    id, recorded = save_new_url_to_bd_urls(correct_url)
+    if recorded:
+        flash("Страница успешно добавлена", "success")
         return redirect(url_for("get_url", id=id))
-    new_id = save_new_url_to_bd_urls(correct_url)
-    flash("Страница успешно добавлена", "success")
-    return redirect(url_for("get_url", id=new_id))
+    flash("Страница уже существует", "info")
+    return redirect(url_for("get_url", id=id))
 
 
 @app.route("/urls", methods=["GET"])
