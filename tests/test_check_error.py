@@ -1,5 +1,9 @@
 from page_analyzer.app import check_error, app
 import pytest
+import os
+
+
+app.secret_key = os.urandom(24)
 
 
 @pytest.mark.parametrize(
