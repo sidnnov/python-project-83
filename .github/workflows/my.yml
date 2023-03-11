@@ -32,6 +32,7 @@ jobs:
     - name: Set up PostgreSQL
       run: |
         export DATABASE_URL=postgresql://postgres:password@localhost:5432/test_db
+        sudo service postgresql start
         psql test_db < database.sql
     - name: Run tests
       env:
